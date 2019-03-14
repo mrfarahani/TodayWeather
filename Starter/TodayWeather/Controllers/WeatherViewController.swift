@@ -70,7 +70,7 @@ class WeatherViewController: UIViewController {
 extension WeatherViewController {
     
   // TODO: Move to ViewModel
-  func getWeatherData(cityName: String, requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void) {
+  func getWeatherData(cityName: String, requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void = { result, error in }) {
     weatherService.fetchWeatherData(cityName: cityName, type: requestType) { result, error in
       completion(result, error)
     }
