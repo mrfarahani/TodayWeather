@@ -62,7 +62,7 @@ class WeatherViewModel {
   
   func getWeatherData(requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void = { result, error in }) {
     weatherService.fetchWeatherData(cityName: cityName.value, type: requestType) { result, error in
-      if let weather = result as? Weather {
+      if let weather = result as? CurrentWeather {
         self.weatherData.value["degree"] = "\(self.formattedDegree(weather.degree))°"
         self.weatherData.value["description"] = weather.description.capitalized
         self.weatherData.value["imageId"] = WeatherService.ResourcePath.Icon.path + weather.imageId

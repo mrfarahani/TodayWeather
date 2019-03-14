@@ -28,65 +28,49 @@
 
 import Foundation
 
-struct InitialForecastElement: Codable {
-  let list: [List]?
+struct InitialWeatherElement: Codable {
+  let main: Main?
+  let weather: [Weather]?
 }
 
-struct List: Codable {
-  let dt: Double?
-  let temp: Temp?
+struct Main: Codable {
+  let temp: Float?
 }
 
-struct Temp: Codable {
-  let min: Float?
-  let max: Float?
+struct Weather: Codable {
+  let description: String?
+  let icon: String?
 }
 
-
-struct Forecast: WeatherProtocol {
+struct CurrentWeather: WeatherProtocol {
   
-  private let list: [List]
+  let degree: Float
+  let description: String
+  let imageId: String
   
-  
-  init?(data: Data) {
-    var forecastData: InitialForecastElement?
-    
+  init?(data: Data?) {
+    guard let data = data else {
+      return nil
+    }
+    var weatherData: InitialWeatherElement?
     do {
       let decoder = JSONDecoder()
-      forecastData = try decoder.decode(InitialForecastElement.self, from: data)
+      weatherData = try decoder.decode(InitialWeatherElement.self, from: data)
       
     } catch let err {
       print("Err", err)
     }
-    
     guard
-      let list = forecastData?.list
+      let degree = weatherData?.main?.temp,
+      let description = weatherData?.weather?.first?.description,
+      let imageId = weatherData?.weather?.first?.icon
       else {
         return nil
     }
-    self.list = list
+    
+    self.degree = degree
+    self.description = description
+    self.imageId = imageId
   }
   
-  func getList() -> [ForecastItem]? {
-    var forecastItems = [ForecastItem]()
-    for item in list {
-      guard
-        let timestamp = item.dt,
-        let minDegree = item.temp?.min,
-        let maxDegree = item.temp?.max
-        else {
-          return nil
-      }
-      let date = Date(timeIntervalSince1970: timestamp)
-      let item = ForecastItem(date: date, minDegree: minDegree, maxDegree: maxDegree)
-      forecastItems.append(item)
-    }
-    return forecastItems
-  }
-}
-
-struct ForecastItem {
-  let date: Date
-  let minDegree: Float
-  let maxDegree: Float
 }

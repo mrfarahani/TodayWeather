@@ -27,37 +27,52 @@
 /// THE SOFTWARE.
 
 import Foundation
-import SwiftyJSON
 
-struct Weather: WeatherProtocol {
-  
-  let degree: Float
-  let description: String
-  let imageId: String
-  
-  init?(data: Data?) {
-    guard let data = data else {
-      return nil
-    }
-    var json: JSON!
-    do {
-      json = try JSON(data: data)
-    }
-    catch {
-      print("Error JSON: \(error)")
-    }
-    
-    guard
-      let degree = json["main"]["temp"].float,
-      let description = json["weather"][0]["description"].string,
-      let imageId = json["weather"][0]["icon"].string
-    else {
-        return nil
-    }
-    
-    self.degree = degree
-    self.description = description
-    self.imageId = imageId
+class WeatherViewModel {
+  var cityName: Box<String?> = Box(nil)
+
+  enum DegreeType {
+    case Kelvin
+    case Celsius
   }
-  
+
+  let degreeType: DegreeType = DegreeType.Celsius
+  let CELSIUS_TO_KELVIN: Float = 273.15
+
+  func getWeatherData(cityName: String, requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void) {
+    WeatherService().fetchWeatherData(cityName: cityName, type: requestType) { result, error in
+      completion(result, error)
+    }
+  }
+
+  func formattedDegree(_ degree: Float) -> String {
+    switch degreeType {
+    case .Celsius:
+      return "\(Int((degree - self.CELSIUS_TO_KELVIN).rounded()))"
+    case .Kelvin:
+      return "\(Int((degree).rounded()))"
+    }
+  }
+}
+
+class Box<T> {
+  // 2.
+  typealias Listener = (T) -> Void
+  // 3.
+  var listener: Listener?
+  // 4.
+  var value: T {
+    didSet {
+      listener?(value)
+    }
+  }
+  // 5.
+  init(_ value: T) {
+    self.value = value
+  }
+  // 6.
+  func bind(listener: Listener?) {
+    self.listener = listener
+    listener?(value)
+  }
 }

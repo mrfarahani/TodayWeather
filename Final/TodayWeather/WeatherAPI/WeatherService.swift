@@ -80,7 +80,7 @@ struct WeatherService {
       }
       switch type {
       case .CurrentWeather:
-        guard let weather = Weather(data: data) else {
+        guard let weather = CurrentWeather(data: data) else {
           return completion(nil, APIError.ParseError("Error parsing response ☹️"))
         }
         completion(weather, nil)

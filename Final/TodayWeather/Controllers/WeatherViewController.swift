@@ -27,7 +27,6 @@
 /// THE SOFTWARE.
 
 import UIKit
-import SwiftyJSON
 
 class WeatherViewController: UIViewController {
   @IBOutlet weak var degreeLabel: UILabel!

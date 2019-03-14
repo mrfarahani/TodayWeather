@@ -27,7 +27,6 @@
 /// THE SOFTWARE.
 
 import UIKit
-import SwiftyJSON
 
 class WeatherViewController: UIViewController {
   @IBOutlet weak var degreeLabel: UILabel!
@@ -133,7 +132,7 @@ extension WeatherViewController: UITextFieldDelegate {
     }
     
     getWeatherData(cityName: textField.text ?? "", requestType: .CurrentWeather) { weather, error in
-      guard let weather = weather as? Weather else {
+      guard let weather = weather as? CurrentWeather else {
         DispatchQueue.main.async {
           self.activityIndicator.stopAnimating()
         }

@@ -27,27 +27,43 @@
 /// THE SOFTWARE.
 
 import Foundation
-import SwiftyJSON
 
-struct Weather: WeatherProtocol {
+struct InitialWeatherElement: Codable {
+  let main: Main?
+  let weather: [Weather]?
+}
+
+struct Main: Codable {
+  let temp: Float?
+}
+
+struct Weather: Codable {
+  let description: String?
+  let icon: String?
+}
+
+struct CurrentWeather: WeatherProtocol {
   
   let degree: Float
   let description: String
   let imageId: String
   
-  init?(data: Data) {
-    var json: JSON!
+  init?(data: Data?) {
+    guard let data = data else {
+      return nil
+    }
+    var weatherData: InitialWeatherElement?
     do {
-      json = try JSON(data: data)
+      let decoder = JSONDecoder()
+      weatherData = try decoder.decode(InitialWeatherElement.self, from: data)
+
+    } catch let err {
+      print("Err", err)
     }
-    catch {
-      print("Error JSON: \(error)")
-    }
-    
     guard
-      let degree = json["main"]["temp"].float,
-      let description = json["weather"][0]["description"].string,
-      let imageId = json["weather"][0]["icon"].string
+      let degree = weatherData?.main?.temp,
+      let description = weatherData?.weather?.first?.description,
+      let imageId = weatherData?.weather?.first?.icon
     else {
         return nil
     }

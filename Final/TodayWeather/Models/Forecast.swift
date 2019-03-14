@@ -27,24 +27,40 @@
 /// THE SOFTWARE.
 
 import Foundation
-import SwiftyJSON
+
+struct InitialForecastElement: Codable {
+  let list: [List]?
+}
+
+struct List: Codable {
+  let dt: Double?
+  let temp: Temp?
+}
+
+struct Temp: Codable {
+  let min: Float?
+  let max: Float?
+}
+
 
 struct Forecast: WeatherProtocol {
   
-  private let list: [JSON]
+  private let list: [List]
   
   
   init?(data: Data) {
-    var json: JSON!
+    var forecastData: InitialForecastElement?
+
     do {
-      json = try JSON(data: data)
-    }
-    catch {
-      print("Error JSON: \(error)")
+      let decoder = JSONDecoder()
+      forecastData = try decoder.decode(InitialForecastElement.self, from: data)
+      
+    } catch let err {
+      print("Err", err)
     }
     
     guard
-      let list = json["list"].array
+      let list = forecastData?.list
       else {
         return nil
     }
@@ -55,9 +71,9 @@ struct Forecast: WeatherProtocol {
     var forecastItems = [ForecastItem]()
     for item in list {
       guard
-        let timestamp = item["dt"].double,
-        let minDegree = item["temp"]["min"].float,
-        let maxDegree = item["temp"]["max"].float
+        let timestamp = item.dt,
+        let minDegree = item.temp?.min,
+        let maxDegree = item.temp?.max
       else {
           return nil
       }
