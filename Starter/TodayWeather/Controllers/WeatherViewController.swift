@@ -89,20 +89,24 @@ extension WeatherViewController {
 
 // MARK: Private Methods
 private extension WeatherViewController {
-  func displayError(_ message: String) {
+  func displayError(_ message: String?) {
+    guard message != nil else {
+      return
+    }
     let alertController = UIAlertController(title: nil, message: message, preferredStyle: .alert)
     let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
     alertController.addAction(okAction)
     present(alertController, animated: true, completion: nil)
   }
-    func handleError(_ error: APIError) {
-        switch error {
-        case let .RequestError(reason):
-            self.displayError(reason)
-        case let .ParseError(reason):
-            self.displayError(reason)
-        }
+  
+  func handleError(_ error: APIError) {
+    switch error {
+    case let .RequestError(reason):
+      self.displayError(reason)
+    case let .ParseError(reason):
+      self.displayError(reason)
     }
+  }
 }
 
 // MARK: UITextFieldDelegate
