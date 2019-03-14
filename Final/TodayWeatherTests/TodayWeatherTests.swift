@@ -34,7 +34,7 @@ class TodayWeatherTests: XCTestCase {
   var weatherViewModel: WeatherViewModel!
 
     override func setUp() {
-      weatherViewModel = WeatherViewModel(weatherService: WeatherService())
+      weatherViewModel = WeatherViewModel()
     }
 
     override func tearDown() {
@@ -42,13 +42,15 @@ class TodayWeatherTests: XCTestCase {
     }
   
   func testInvalidCitySearch() {
-    weatherViewModel.getWeatherData(cityName: "asdf123", requestType: RequestType.CurrentWeather) { result, error in
+    weatherViewModel.cityName.value = "InvalidCity"
+    weatherViewModel.getWeatherData(requestType: RequestType.CurrentWeather) { result, error in
       XCTAssertNotNil(error)
     }
   }
   
   func testValidCitySearch() {
-    weatherViewModel.getWeatherData(cityName: "New York", requestType: RequestType.CurrentWeather) { result, error in
+    weatherViewModel.cityName.value = "New York"
+    weatherViewModel.getWeatherData(requestType: RequestType.CurrentWeather) { result, error in
       XCTAssertNil(error)
     }
   }
