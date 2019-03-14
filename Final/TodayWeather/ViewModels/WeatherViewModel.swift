@@ -32,7 +32,7 @@ class WeatherViewModel {
   var weatherService = WeatherService()
 
   var cityName: Box<String?> = Box(nil)
-  var errorHandler: Box<String?> = Box(nil)
+  var errorMessage: Box<String?> = Box(nil)
   
   var weatherData: Box<[String : Any?]> =
     Box(
@@ -73,9 +73,9 @@ class WeatherViewModel {
       if let error = error {
         switch error {
         case let .RequestError(reason):
-          self.errorHandler.value = reason
+          self.errorMessage.value = reason
         case let .ParseError(reason):
-          self.errorHandler.value = reason
+          self.errorMessage.value = reason
         }
       }
       completion(result, error)

@@ -71,7 +71,7 @@ class WeatherViewController: UIViewController {
       }
     }
     
-    viewModel.errorHandler.bind { error in
+    viewModel.errorMessage.bind { error in
       DispatchQueue.main.async {
         self.activityIndicator.stopAnimating()
         self.displayError(error)
