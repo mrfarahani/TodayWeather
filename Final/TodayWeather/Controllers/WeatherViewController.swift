@@ -39,7 +39,7 @@ class WeatherViewController: UIViewController {
   @IBOutlet weak var tableView: UITableView!
   var dataSource: [ForecastItem]?
   
-  private var viewModel: WeatherViewModel!
+  private var viewModel = WeatherViewModel()
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -52,50 +52,41 @@ class WeatherViewController: UIViewController {
     tableView.delegate = self
     tableView.dataSource = self
     cityTextField.delegate = self
-    viewModel = WeatherViewModel(weatherService: WeatherService())
     
-    viewModel.degree.bind { degree in
+    viewModel.cityName.bind {
+      print("cityName new value = \(String(describing: $0))")
+    }
+    
+    viewModel.weatherData.bind { weatherData in
       DispatchQueue.main.async {
-        self.degreeLabel.text = degree
         self.activityIndicator.stopAnimating()
-      }
-    }
-    
-    viewModel.description.bind { description in
-      DispatchQueue.main.async {
-        self.descriptionLabel.text = description
-      }
-    }
-    
-    viewModel.imageId.bind { url in
-      DispatchQueue.main.async {
-        if let url = url {
+        self.degreeLabel.text = weatherData["degree"] as? String
+        self.descriptionLabel.text = weatherData["description"] as? String
+        if let url = URL(string: weatherData["imageId"] as! String) {
           self.weatherImageView.downloaded(from: url)
         }
-      }
-    }
-    
-    viewModel.dataSource.bind { dataSource in
-      DispatchQueue.main.async {
-        self.dataSource = dataSource
+        
+        self.dataSource = weatherData["forecastData"] as? [ForecastItem]
         self.tableView.reloadData()
       }
     }
-
+    
     viewModel.errorHandler.bind { error in
       DispatchQueue.main.async {
         self.activityIndicator.stopAnimating()
-        if !error.isEmpty {
-          self.displayError(error)
-        }
+        self.displayError(error)
       }
     }
   }
+  
 }
 
 // MARK: Private Methods
 private extension WeatherViewController {
-  func displayError(_ message: String) {
+  func displayError(_ message: String?) {
+    guard message != nil else {
+      return
+    }
     let alertController = UIAlertController(title: nil, message: message, preferredStyle: .alert)
     let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
     alertController.addAction(okAction)
@@ -106,13 +97,14 @@ private extension WeatherViewController {
 // MARK: UITextFieldDelegate
 extension WeatherViewController: UITextFieldDelegate {
   func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    viewModel.cityName.value = textField.text
     textField.resignFirstResponder()
     self.activityIndicator.startAnimating()
 
-    viewModel.getWeatherData(cityName: textField.text ?? "", requestType: .Forecast)
-    
-    viewModel.getWeatherData(cityName: textField.text ?? "", requestType: .CurrentWeather)
-    
+    viewModel.getWeatherData(requestType: .Forecast)
+
+    viewModel.getWeatherData(requestType: .CurrentWeather)
+
     return true
   }
   

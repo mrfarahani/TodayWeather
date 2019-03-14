@@ -55,7 +55,7 @@ struct WeatherService {
     }
   }
   
-  func fetchWeatherData(cityName city: String, type: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void) {
+  func fetchWeatherData(cityName city: String?, type: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void) {
     let parameters = ["q": city, "appid": Constants.APPID]
     
     var components: URLComponents!

@@ -29,14 +29,19 @@
 import Foundation
 
 class WeatherViewModel {
-  var weatherService: WeatherService
-  
-  var degree: Box<String> = Box("0")
-  var description: Box<String> = Box("Description")
-  var errorHandler: Box<String> = Box("")
-  var imageId: Box<URL?> = Box(nil)
+  var weatherService = WeatherService()
 
-  var dataSource: Box<[ForecastItem]?> = Box(nil)
+  var cityName: Box<String?> = Box(nil)
+  var errorHandler: Box<String?> = Box(nil)
+  
+  var weatherData: Box<[String : Any?]> =
+    Box(
+      [ "degree" : "0",
+        "description" : "Weather Description",
+        "imageId" : "",
+        "forecastData" : nil
+      ]
+    )
 
   enum DegreeType {
     case Kelvin
@@ -45,14 +50,7 @@ class WeatherViewModel {
   
   var degreeType: DegreeType = DegreeType.Celsius
   let CELSIUS_TO_KELVIN: Float = 273.15
-  
-  init(weatherService: WeatherService) {
-    self.weatherService = weatherService
-  }
-  
-}
 
-extension WeatherViewModel {
   func formattedDegree(_ degree: Float) -> String {
     switch degreeType {
     case .Celsius:
@@ -61,18 +59,18 @@ extension WeatherViewModel {
       return "\(Int((degree).rounded()))"
     }
   }
-
-  func getWeatherData(cityName: String, requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void = { result, error in }) {
-    weatherService.fetchWeatherData(cityName: cityName, type: requestType) { result, error in
+  
+  func getWeatherData(requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void = { result, error in }) {
+    weatherService.fetchWeatherData(cityName: cityName.value, type: requestType) { result, error in
       if let weather = result as? Weather {
-        self.degree.value = "\(self.formattedDegree(weather.degree))°"
-        self.description.value = weather.description.capitalized
-        self.imageId.value = URL(string: WeatherService.ResourcePath.Icon.path + weather.imageId)
+        self.weatherData.value["degree"] = "\(self.formattedDegree(weather.degree))°"
+        self.weatherData.value["description"] = weather.description.capitalized
+        self.weatherData.value["imageId"] = WeatherService.ResourcePath.Icon.path + weather.imageId
       }
       else if let forecast = result as? Forecast {
-        self.dataSource.value = forecast.getList()
+        self.weatherData.value["forecastData"] = forecast.getList()
       }
-      else if let error = error {
+      if let error = error {
         switch error {
         case let .RequestError(reason):
           self.errorHandler.value = reason
@@ -84,3 +82,4 @@ extension WeatherViewModel {
     }
   }
 }
+
