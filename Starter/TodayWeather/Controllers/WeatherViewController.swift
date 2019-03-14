@@ -42,6 +42,8 @@ class WeatherViewController: UIViewController {
 
   
   // TODO: Move to ViewModel
+  var weatherService = WeatherService()
+  
   enum DegreeType {
     case Kelvin
     case Celsius
@@ -49,7 +51,7 @@ class WeatherViewController: UIViewController {
   
   let degreeType: DegreeType = DegreeType.Celsius
   let CELSIUS_TO_KELVIN: Float = 273.15
-  
+  // TODO end
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -65,11 +67,11 @@ class WeatherViewController: UIViewController {
 
 }
 
-// MARK: Things to move
 extension WeatherViewController {
-  
+    
+  // TODO: Move to ViewModel
   func getWeatherData(cityName: String, requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void) {
-    WeatherService().fetchWeatherData(cityName: cityName, type: requestType) { result, error in
+    weatherService.fetchWeatherData(cityName: cityName, type: requestType) { result, error in
       completion(result, error)
     }
   }
@@ -82,6 +84,8 @@ extension WeatherViewController {
       return "\(Int((degree).rounded()))"
     }
   }
+  // TODO end
+    
 }
 
 // MARK: Private Methods
@@ -92,6 +96,14 @@ private extension WeatherViewController {
     alertController.addAction(okAction)
     present(alertController, animated: true, completion: nil)
   }
+    func handleError(_ error: APIError) {
+        switch error {
+        case let .RequestError(reason):
+            self.displayError(reason)
+        case let .ParseError(reason):
+            self.displayError(reason)
+        }
+    }
 }
 
 // MARK: UITextFieldDelegate
@@ -108,12 +120,7 @@ extension WeatherViewController: UITextFieldDelegate {
           self.activityIndicator.stopAnimating()
         }
         if let error = error {
-          switch error {
-          case let .RequestError(reason):
-            self.displayError(reason)
-          case let .ParseError(reason):
-            self.displayError(reason)
-          }
+            self.handleError(error)
         }
         return
       }
@@ -131,12 +138,7 @@ extension WeatherViewController: UITextFieldDelegate {
           self.activityIndicator.stopAnimating()
         }
         if let error = error {
-          switch error {
-          case let .RequestError(reason):
-            self.displayError(reason)
-          case let .ParseError(reason):
-            self.displayError(reason)
-          }
+          self.handleError(error)
         }
         return
       }
@@ -146,6 +148,9 @@ extension WeatherViewController: UITextFieldDelegate {
         self.activityIndicator.stopAnimating()
         self.descriptionLabel.text = weather.description.capitalized
         self.degreeLabel.text = "\(degree)°"
+        if let url = URL(string: WeatherService.ResourcePath.Icon.path + weather.imageId) {
+          self.weatherImageView.downloaded(from: url)
+        }
       }
     }
     return true
