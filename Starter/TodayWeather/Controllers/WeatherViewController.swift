@@ -48,7 +48,7 @@ class WeatherViewController: UIViewController {
     case Celsius
   }
   
-  let degreeType: DegreeType = DegreeType.Celsius
+  var degreeType: DegreeType = DegreeType.Celsius
   let CELSIUS_TO_KELVIN: Float = 273.15
   // TODO end
   
@@ -69,18 +69,18 @@ class WeatherViewController: UIViewController {
 extension WeatherViewController {
     
   // TODO: Move to ViewModel
-  func getWeatherData(cityName: String, requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void = { result, error in }) {
-    weatherService.fetchWeatherData(cityName: cityName, type: requestType) { result, error in
-      completion(result, error)
-    }
-  }
-  
   func formattedDegree(_ degree: Float) -> String {
     switch degreeType {
     case .Celsius:
       return "\(Int((degree - self.CELSIUS_TO_KELVIN).rounded()))"
     case .Kelvin:
       return "\(Int((degree).rounded()))"
+    }
+  }
+  
+  func getWeatherData(cityName: String, requestType: RequestType, completion: @escaping (WeatherProtocol?, APIError?) -> Void = { result, error in }) {
+    weatherService.fetchWeatherData(cityName: cityName, type: requestType) { result, error in
+      completion(result, error)
     }
   }
   // TODO end
